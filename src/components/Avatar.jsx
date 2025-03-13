@@ -8,6 +8,7 @@ import { useFrame } from "@react-three/fiber";
 import { button, useControls } from "leva";
 import React, { useEffect, useRef, useState } from "react";
 
+
 import * as THREE from "three";
 import { useChat } from "../hooks/useChat";
 
@@ -108,23 +109,27 @@ let setupMode = false;
 
 export function Avatar(props) {
   const { nodes, materials, scene } = useGLTF(
-    "/models/64f1a714fe61576b46f27ca2.glb"
+    "/models/67c42818e8937271bd24ffcc.glb"
   );
 
   const { message, onMessagePlayed, chat } = useChat();
 
   const [lipsync, setLipsync] = useState();
 
+
   useEffect(() => {
     console.log(message);
+
     if (!message) {
       setAnimation("Idle");
       return;
     }
     setAnimation(message.animation);
     setFacialExpression(message.facialExpression);
+
     setLipsync(message.lipsync);
     const audio = new Audio("data:audio/mp3;base64," + message.audio);
+    console.log("audio:" + audio);
     audio.play();
     setAudio(audio);
     audio.onended = onMessagePlayed;
@@ -134,9 +139,11 @@ export function Avatar(props) {
 
   const group = useRef();
   const { actions, mixer } = useAnimations(animations, group);
+
   const [animation, setAnimation] = useState(
     animations.find((a) => a.name === "Idle") ? "Idle" : animations[0].name // Check if Idle animation exists otherwise use first animation
   );
+
   useEffect(() => {
     actions[animation]
       .reset()
@@ -144,6 +151,7 @@ export function Avatar(props) {
       .play();
     return () => actions[animation].fadeOut(0.5);
   }, [animation]);
+
 
   const lerpMorphTarget = (target, value, speed = 0.1) => {
     scene.traverse((child) => {
@@ -166,7 +174,7 @@ export function Avatar(props) {
             set({
               [target]: value,
             });
-          } catch (e) {}
+          } catch (e) { }
         }
       }
     });
@@ -178,7 +186,9 @@ export function Avatar(props) {
   const [facialExpression, setFacialExpression] = useState("");
   const [audio, setAudio] = useState();
 
+
   useFrame(() => {
+
     !setupMode &&
       Object.keys(nodes.EyeLeft.morphTargetDictionary).forEach((key) => {
         const mapping = facialExpressions[facialExpression];
@@ -194,6 +204,8 @@ export function Avatar(props) {
 
     lerpMorphTarget("eyeBlinkLeft", blink || winkLeft ? 1 : 0, 0.5);
     lerpMorphTarget("eyeBlinkRight", blink || winkRight ? 1 : 0, 0.5);
+
+
 
     // LIPSYNC
     if (setupMode) {
@@ -215,7 +227,6 @@ export function Avatar(props) {
         }
       }
     }
-
     Object.values(corresponding).forEach((value) => {
       if (appliedMorphTargets.includes(value)) {
         return;
@@ -223,6 +234,8 @@ export function Avatar(props) {
       lerpMorphTarget(value, 0, 0.1);
     });
   });
+
+
 
   useControls("FacialExpressions", {
     chat: button(() => chat()),
@@ -257,7 +270,7 @@ export function Avatar(props) {
         }
         const value =
           nodes.EyeLeft.morphTargetInfluences[
-            nodes.EyeLeft.morphTargetDictionary[key]
+          nodes.EyeLeft.morphTargetDictionary[key]
           ];
         if (value > 0.01) {
           emotionValues[key] = value;
@@ -305,39 +318,11 @@ export function Avatar(props) {
     return () => clearTimeout(blinkTimeout);
   }, []);
 
+
+
   return (
     <group {...props} dispose={null} ref={group}>
       <primitive object={nodes.Hips} />
-      <skinnedMesh
-        name="Wolf3D_Body"
-        geometry={nodes.Wolf3D_Body.geometry}
-        material={materials.Wolf3D_Body}
-        skeleton={nodes.Wolf3D_Body.skeleton}
-      />
-      <skinnedMesh
-        name="Wolf3D_Outfit_Bottom"
-        geometry={nodes.Wolf3D_Outfit_Bottom.geometry}
-        material={materials.Wolf3D_Outfit_Bottom}
-        skeleton={nodes.Wolf3D_Outfit_Bottom.skeleton}
-      />
-      <skinnedMesh
-        name="Wolf3D_Outfit_Footwear"
-        geometry={nodes.Wolf3D_Outfit_Footwear.geometry}
-        material={materials.Wolf3D_Outfit_Footwear}
-        skeleton={nodes.Wolf3D_Outfit_Footwear.skeleton}
-      />
-      <skinnedMesh
-        name="Wolf3D_Outfit_Top"
-        geometry={nodes.Wolf3D_Outfit_Top.geometry}
-        material={materials.Wolf3D_Outfit_Top}
-        skeleton={nodes.Wolf3D_Outfit_Top.skeleton}
-      />
-      <skinnedMesh
-        name="Wolf3D_Hair"
-        geometry={nodes.Wolf3D_Hair.geometry}
-        material={materials.Wolf3D_Hair}
-        skeleton={nodes.Wolf3D_Hair.skeleton}
-      />
       <skinnedMesh
         name="EyeLeft"
         geometry={nodes.EyeLeft.geometry}
@@ -370,9 +355,34 @@ export function Avatar(props) {
         morphTargetDictionary={nodes.Wolf3D_Teeth.morphTargetDictionary}
         morphTargetInfluences={nodes.Wolf3D_Teeth.morphTargetInfluences}
       />
+      <skinnedMesh
+        geometry={nodes.Wolf3D_Hair.geometry}
+        material={materials.Wolf3D_Hair}
+        skeleton={nodes.Wolf3D_Hair.skeleton}
+      />
+      <skinnedMesh
+        geometry={nodes.Wolf3D_Outfit_Top.geometry}
+        material={materials.Wolf3D_Outfit_Top}
+        skeleton={nodes.Wolf3D_Outfit_Top.skeleton}
+      />
+      <skinnedMesh
+        geometry={nodes.Wolf3D_Outfit_Bottom.geometry}
+        material={materials.Wolf3D_Outfit_Bottom}
+        skeleton={nodes.Wolf3D_Outfit_Bottom.skeleton}
+      />
+      <skinnedMesh
+        geometry={nodes.Wolf3D_Outfit_Footwear.geometry}
+        material={materials.Wolf3D_Outfit_Footwear}
+        skeleton={nodes.Wolf3D_Outfit_Footwear.skeleton}
+      />
+      <skinnedMesh
+        geometry={nodes.Wolf3D_Body.geometry}
+        material={materials.Wolf3D_Body}
+        skeleton={nodes.Wolf3D_Body.skeleton}
+      />
     </group>
   );
 }
 
-useGLTF.preload("/models/64f1a714fe61576b46f27ca2.glb");
+useGLTF.preload("/models/67c42818e8937271bd24ffcc.glb");
 useGLTF.preload("/models/animations.glb");
