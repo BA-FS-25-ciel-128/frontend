@@ -55,12 +55,15 @@ export const Experience = () => {
   return (
     <>
       <CameraControls ref={cameraControls} />
+  
+      <Avatar  />
       <Environment preset="sunset" />
+    
       {/* Wrapping Dots into Suspense to prevent Blink when Troika/Font is loaded */}
       <Suspense>
         <Dots position-y={1.75} position-x={-0.02} />
       </Suspense>
-      <Avatar />
+      
       <ContactShadows opacity={0.7} />
     </>
   );
