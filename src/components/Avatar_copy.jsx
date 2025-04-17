@@ -333,7 +333,7 @@ export function Avatar(props) {
 
   return (
     <group {...props} dispose={null} ref={group}>
-      <group position={[0, 0.5, -5]} scale={0.641}>
+      <group position={[0, 0, -4]} scale={0.641}>
         <primitive object={nodes.spine} />
         <skinnedMesh geometry={nodes.Body.geometry} material={materials.Material_0} skeleton={nodes.Body.skeleton}
           morphTargetDictionary={[nodes.Head.morphTargetDictionary, nodes.left_eye.morphTargetDictionary, nodes.right_eye.morphTargetDictionary, nodes.left_eyebrow.morphTargetDictionary, nodes.right_eyebrow.morphTargetDictionary]}
