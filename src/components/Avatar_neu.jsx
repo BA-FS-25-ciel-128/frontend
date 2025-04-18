@@ -122,7 +122,7 @@ export function Avatar(props) {
   //const { actions, mixer } = useAnimations(animations, group);
 
   const [animation, setAnimation] = useState(
-    animations.find((a) => a.name === "new idle by jasmin") ? "new idle by jasmin" : animations[0].name // Check if Idle animation exists otherwise use first animation
+    //animations.find((a) => a.name === "new idle by jasmin") ? "new idle by jasmin" : animations[0].name // Check if Idle animation exists otherwise use first animation
   );
 
   console.log(animations)
@@ -136,7 +136,7 @@ export function Avatar(props) {
     console.log(message);
 
     if (!message) {
-      setAnimation("idle_animation");
+      //setAnimation("idle_animation");
       return;
     }
     //setAnimation(message.animation);
@@ -232,18 +232,22 @@ export function Avatar(props) {
 
     if (message && lipsync) {
       const currentAudioTime = audio.currentTime;
-      
+
 
       Object.values(corresponding).forEach((value) => {
 
-        nodes.Head.morphTargetInfluences[nodes.Head.morphTargetDictionary[value]] = 0;
+        nodes.head.children[0].morphTargetInfluences[nodes.head.children[0].morphTargetDictionary[value]] = 0;
+        nodes.head.children[1].morphTargetInfluences[nodes.head.children[1].morphTargetDictionary[value]] = 0;
+        nodes.head.children[2].morphTargetInfluences[nodes.head.children[2].morphTargetDictionary[value]] = 0;
 
       });
 
       for (let i = 0; i < lipsync.mouthCues.length; i++) {
         const mouthCue = lipsync.mouthCues[i];
         if (currentAudioTime >= mouthCue.start && currentAudioTime <= mouthCue.end) {
-          nodes.Head.morphTargetInfluences[nodes.Head.morphTargetDictionary[corresponding[mouthCue.value]]] = 1;
+          nodes.head.children[0].morphTargetInfluences[nodes.head.children[0].morphTargetDictionary[corresponding[mouthCue.value]]] = 1;
+          nodes.head.children[1].morphTargetInfluences[nodes.head.children[1].morphTargetDictionary[corresponding[mouthCue.value]]] = 1;
+          nodes.head.children[2].morphTargetInfluences[nodes.head.children[2].morphTargetDictionary[corresponding[mouthCue.value]]] = 1;
           break;
         }
       }
@@ -341,10 +345,10 @@ export function Avatar(props) {
     <group {...props} dispose={null} ref={group}>
       <group position={[0, 0, -4]} scale={0.641}>
         <primitive object={nodes.spine} />
-        <skinnedMesh  geometry={nodes.body.geometry} material={materials['Material.009']} skeleton={nodes.body.skeleton}
-          morphTargetDictionary={[nodes.Head.morphTargetDictionary, nodes.left_eye.children[0].morphTargetDictionary, nodes.right_eye.morphTargetDictionary, nodes.left_eyebrow.morphTargetDictionary, nodes.right_eyebrow.morphTargetDictionary]}
-          morphTargetInfluences={[nodes.Head.morphInfluences, nodes.left_eye.children[0].morphInfluences, nodes.right_eye.morphInfluences, nodes.left_eye.morphInfluences, nodes.right_eyebrow.morphInfluences]} />
-      
+        <skinnedMesh geometry={nodes.body.geometry} material={materials['Material.009']} skeleton={nodes.body.skeleton}
+          morphTargetDictionary={[nodes.head.children[0].morphTargetDictionary, nodes.left_eye.children[0].morphTargetDictionary, nodes.right_eye.morphTargetDictionary, nodes.left_eyebrow.morphTargetDictionary, nodes.right_eyebrow.morphTargetDictionary]}
+          morphTargetInfluences={[nodes.head.children[0].morphInfluences, nodes.left_eye.children[0].morphInfluences, nodes.right_eye.morphInfluences, nodes.left_eye.morphInfluences, nodes.right_eyebrow.morphInfluences]} />
+
       </group>
     </group>
   );
