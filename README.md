@@ -1,8 +1,12 @@
-# TalkyWalky Chat Application
+# TalkyWalky Chat Application Frontend
 
 ## Description
 
-This project is part of our (Ilimea Gall and Jasmin Zuzo) Bachelor's thesis and shows a 3D-Avatar, called TalkyWalky, embedded in a chat environment. TalkyWalky takes on the role of an English teacher for children, responding with animations and expressions that match the current of the conversation.
+This project is part of our (Ilimea Gall and Jasmin Zuzo) Bachelor's thesis at ZHAW and shows a 3D-Avatar, called TalkyWalky, embedded in a chat environment. TalkyWalky takes on the role of an English teacher for children, responding with animations and expressions that match the current of the conversation. 
+
+TODO here add picture
+
+Simply write a short message in the input box to start chatting with TalkyWalky.
 
 ## Background
 
@@ -16,6 +20,3 @@ The project uses Three.js together with React to render the 3D avatar and manage
 - clone this repository
 - run npm dev install
 - run npm dev 
-
-
-TODO add pictures once the project is completed
