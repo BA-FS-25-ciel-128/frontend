@@ -24,7 +24,9 @@ The project uses Three.js together with React to render the 3D avatar and manage
 
 ## Getting Started
 
+**Start the application locally**
+
 - clone this repository
 - clone the backend repository
-- run `npm dev install`
+- run `npm install`
 - run `npm run dev`
