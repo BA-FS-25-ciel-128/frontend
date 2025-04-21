@@ -13,7 +13,7 @@ Additionally, the blend file of the avatar TalkyWalky can be found [here](https:
 
 ## Functionality
 
-TODO here add picture
+TODO here: add picture
 
 Simply write a short message in the input box to start chatting with TalkyWalky. The message is sent to the backend for processing. Once a response is received, the frontend animates the avatar accordingly, including lip sync, facial expressions and matching body movements.
 
@@ -28,7 +28,13 @@ The project uses Three.js together with React to render the 3D avatar and manage
 
 **Start the application locally**
 
-- clone this repository
-- clone the backend repository
-- run `npm install`
-- run `npm run dev`
+- Clone this repository
+- Clone the backend repository and follow the instructions there
+- Run `npm install` in the project folder
+- Run `npm run dev` in the project folder
+
+**Start the application with Docker**
+
+- Clone this repository
+- Clone the backend repository and follow the instructions there
+- Run `docker compose up` in the project folder
