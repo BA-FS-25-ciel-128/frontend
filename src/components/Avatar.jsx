@@ -136,7 +136,7 @@ export function Avatar(props) {
       setAnimation("idle");
       return;
     }
-    //setAnimation(message.animation);
+    setAnimation(message.animation);
     //setFacialExpression(message.facialExpression);
 
     setLipsync(message.lipsync);
