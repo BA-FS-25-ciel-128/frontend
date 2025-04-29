@@ -94,23 +94,35 @@ const facialExpressions = {
 };
 
 const corresponding = {
-  A: "viseme_PP",
-  B: "viseme_kk",
-  C: "viseme_I",
-  D: "viseme_AA",
-  E: "viseme_O",
-  F: "viseme_U",
-  G: "viseme_FF",
-  H: "viseme_TH",
-  X: "viseme_PP",
+  A: "A",
+  B: "B",
+  C: "C",
+  D: "D",
+  E: "E",
+  F: "F",
+  G: "A",
+  H: "A",
+  X: "X"
 };
 
 let setupMode = false;
 
 export function Avatar(props) {
-  const { nodes, materials, scene } = useGLTF(
-    "/models/67c42818e8937271bd24ffcc.glb"
+  const group = useRef();
+
+  const { nodes, materials, scene, animations } = useGLTF(
+    "/models/talkywalky.glb"
   );
+
+  console.log("nodes", nodes);
+
+  const { actions, mixer } = useAnimations(animations, group);
+
+  const [animation, setAnimation] = useState(
+    animations.find((a) => a.name === "idle") ? "idle" : animations[0].name // Check if Idle animation exists otherwise use first animation
+  );
+
+  console.log(animations)
 
   const { message, onMessagePlayed, chat } = useChat();
 
@@ -121,11 +133,11 @@ export function Avatar(props) {
     console.log(message);
 
     if (!message) {
-      setAnimation("Idle");
+      setAnimation("idle");
       return;
     }
-    setAnimation(message.animation);
-    setFacialExpression(message.facialExpression);
+    //setAnimation(message.animation);
+    //setFacialExpression(message.facialExpression);
 
     setLipsync(message.lipsync);
     const audio = new Audio("data:audio/mp3;base64," + message.audio);
@@ -135,14 +147,6 @@ export function Avatar(props) {
     audio.onended = onMessagePlayed;
   }, [message]);
 
-  const { animations } = useGLTF("/models/animations.glb");
-
-  const group = useRef();
-  const { actions, mixer } = useAnimations(animations, group);
-
-  const [animation, setAnimation] = useState(
-    animations.find((a) => a.name === "Idle") ? "Idle" : animations[0].name // Check if Idle animation exists otherwise use first animation
-  );
 
   useEffect(() => {
     actions[animation]
@@ -188,9 +192,10 @@ export function Avatar(props) {
 
 
   useFrame(() => {
+    /*
 
     !setupMode &&
-      Object.keys(nodes.EyeLeft.morphTargetDictionary).forEach((key) => {
+      Object.keys(nodes.left_eye.morphTargetDictionary).forEach((key) => {
         const mapping = facialExpressions[facialExpression];
         if (key === "eyeBlinkLeft" || key === "eyeBlinkRight") {
           return; // eyes wink/blink are handled separately
@@ -202,41 +207,52 @@ export function Avatar(props) {
         }
       });
 
+    */
+
     lerpMorphTarget("eyeBlinkLeft", blink || winkLeft ? 1 : 0, 0.5);
     lerpMorphTarget("eyeBlinkRight", blink || winkRight ? 1 : 0, 0.5);
 
 
+
+    nodes.left_eye.children[0].morphTargetInfluences[nodes.left_eye.children[0].morphTargetDictionary["smile"]] = 0;
+    nodes.left_eye.children[0].morphTargetInfluences[nodes.left_eye.children[0].morphTargetDictionary["happy"]] = 0;
+    nodes.left_eye.children[0].morphTargetInfluences[nodes.left_eye.children[0].morphTargetDictionary["heart"]] = 0;
+    nodes.left_eye.children[0].morphTargetInfluences[nodes.left_eye.children[0].morphTargetDictionary["sad"]] = 0;
+    nodes.left_eye.children[0].morphTargetInfluences[nodes.left_eye.children[0].morphTargetDictionary["star"]] = 0;
 
     // LIPSYNC
     if (setupMode) {
       return;
     }
 
-    const appliedMorphTargets = [];
+
     if (message && lipsync) {
       const currentAudioTime = audio.currentTime;
+
+
+      Object.values(corresponding).forEach((value) => {
+
+        nodes.head.children[0].morphTargetInfluences[nodes.head.children[0].morphTargetDictionary[value]] = 0;
+        nodes.head.children[1].morphTargetInfluences[nodes.head.children[1].morphTargetDictionary[value]] = 0;
+        nodes.head.children[2].morphTargetInfluences[nodes.head.children[2].morphTargetDictionary[value]] = 0;
+
+      });
+
       for (let i = 0; i < lipsync.mouthCues.length; i++) {
         const mouthCue = lipsync.mouthCues[i];
-        if (
-          currentAudioTime >= mouthCue.start &&
-          currentAudioTime <= mouthCue.end
-        ) {
-          appliedMorphTargets.push(corresponding[mouthCue.value]);
-          lerpMorphTarget(corresponding[mouthCue.value], 1, 0.2);
+        if (currentAudioTime >= mouthCue.start && currentAudioTime <= mouthCue.end) {
+          nodes.head.children[0].morphTargetInfluences[nodes.head.children[0].morphTargetDictionary[corresponding[mouthCue.value]]] = 1;
+          nodes.head.children[1].morphTargetInfluences[nodes.head.children[1].morphTargetDictionary[corresponding[mouthCue.value]]] = 1;
+          nodes.head.children[2].morphTargetInfluences[nodes.head.children[2].morphTargetDictionary[corresponding[mouthCue.value]]] = 1;
           break;
         }
       }
     }
-    Object.values(corresponding).forEach((value) => {
-      if (appliedMorphTargets.includes(value)) {
-        return;
-      }
-      lerpMorphTarget(value, 0, 0.1);
-    });
   });
 
 
-
+  /*
+  
   useControls("FacialExpressions", {
     chat: button(() => chat()),
     winkLeft: button(() => {
@@ -279,7 +295,7 @@ export function Avatar(props) {
       console.log(JSON.stringify(emotionValues, null, 2));
     }),
   });
-
+  
   const [, set] = useControls("MorphTarget", () =>
     Object.assign(
       {},
@@ -302,7 +318,8 @@ export function Avatar(props) {
       })
     )
   );
-
+  
+  
   useEffect(() => {
     let blinkTimeout;
     const nextBlink = () => {
@@ -317,72 +334,118 @@ export function Avatar(props) {
     nextBlink();
     return () => clearTimeout(blinkTimeout);
   }, []);
-
-
+  
+  */
 
   return (
-    <group {...props} dispose={null} ref={group}>
-      <primitive object={nodes.Hips} />
-      <skinnedMesh
-        name="EyeLeft"
-        geometry={nodes.EyeLeft.geometry}
-        material={materials.Wolf3D_Eye}
-        skeleton={nodes.EyeLeft.skeleton}
-        morphTargetDictionary={nodes.EyeLeft.morphTargetDictionary}
-        morphTargetInfluences={nodes.EyeLeft.morphTargetInfluences}
-      />
-      <skinnedMesh
-        name="EyeRight"
-        geometry={nodes.EyeRight.geometry}
-        material={materials.Wolf3D_Eye}
-        skeleton={nodes.EyeRight.skeleton}
-        morphTargetDictionary={nodes.EyeRight.morphTargetDictionary}
-        morphTargetInfluences={nodes.EyeRight.morphTargetInfluences}
-      />
-      <skinnedMesh
-        name="Wolf3D_Head"
-        geometry={nodes.Wolf3D_Head.geometry}
-        material={materials.Wolf3D_Skin}
-        skeleton={nodes.Wolf3D_Head.skeleton}
-        morphTargetDictionary={nodes.Wolf3D_Head.morphTargetDictionary}
-        morphTargetInfluences={nodes.Wolf3D_Head.morphTargetInfluences}
-      />
-      <skinnedMesh
-        name="Wolf3D_Teeth"
-        geometry={nodes.Wolf3D_Teeth.geometry}
-        material={materials.Wolf3D_Teeth}
-        skeleton={nodes.Wolf3D_Teeth.skeleton}
-        morphTargetDictionary={nodes.Wolf3D_Teeth.morphTargetDictionary}
-        morphTargetInfluences={nodes.Wolf3D_Teeth.morphTargetInfluences}
-      />
-      <skinnedMesh
-        geometry={nodes.Wolf3D_Hair.geometry}
-        material={materials.Wolf3D_Hair}
-        skeleton={nodes.Wolf3D_Hair.skeleton}
-      />
-      <skinnedMesh
-        geometry={nodes.Wolf3D_Outfit_Top.geometry}
-        material={materials.Wolf3D_Outfit_Top}
-        skeleton={nodes.Wolf3D_Outfit_Top.skeleton}
-      />
-      <skinnedMesh
-        geometry={nodes.Wolf3D_Outfit_Bottom.geometry}
-        material={materials.Wolf3D_Outfit_Bottom}
-        skeleton={nodes.Wolf3D_Outfit_Bottom.skeleton}
-      />
-      <skinnedMesh
-        geometry={nodes.Wolf3D_Outfit_Footwear.geometry}
-        material={materials.Wolf3D_Outfit_Footwear}
-        skeleton={nodes.Wolf3D_Outfit_Footwear.skeleton}
-      />
-      <skinnedMesh
-        geometry={nodes.Wolf3D_Body.geometry}
-        material={materials.Wolf3D_Body}
-        skeleton={nodes.Wolf3D_Body.skeleton}
-      />
+    <group ref={group} {...props} dispose={null}>
+      <group name="Scene">
+        <group name="metarig001" position={[0, 0, -4]} scale={0.641}>
+          <skinnedMesh
+            name="body"
+            geometry={nodes.body.geometry}
+            material={materials['Material.009']}
+            skeleton={nodes.body.skeleton}
+            morphTargetDictionary={[nodes.head.children[0].morphTargetDictionary, nodes.left_eye.children[0].morphTargetDictionary, nodes.right_eye.morphTargetDictionary, nodes.left_eyebrow.morphTargetDictionary, nodes.right_eyebrow.morphTargetDictionary]}
+            morphTargetInfluences={[nodes.head.children[0].morphInfluences, nodes.left_eye.children[0].morphInfluences, nodes.right_eye.morphInfluences, nodes.left_eye.morphInfluences, nodes.right_eyebrow.morphInfluences]}
+          />
+          <group name="feet">
+            <skinnedMesh
+              name="Cube001"
+              geometry={nodes.Cube001.geometry}
+              material={materials['Material.009']}
+              skeleton={nodes.Cube001.skeleton}
+            />
+            <skinnedMesh
+              name="Cube001_1"
+              geometry={nodes.Cube001_1.geometry}
+              material={materials['Material.007']}
+              skeleton={nodes.Cube001_1.skeleton}
+            />
+          </group>
+          <skinnedMesh
+            name="hands"
+            geometry={nodes.hands.geometry}
+            material={materials['Material.009']}
+            skeleton={nodes.hands.skeleton}
+          />
+          <skinnedMesh
+            name="hip"
+            geometry={nodes.hip.geometry}
+            material={materials['Material.008']}
+            skeleton={nodes.hip.skeleton}
+          />
+          <skinnedMesh
+            name="index_fingers"
+            geometry={nodes.index_fingers.geometry}
+            material={materials['Material.008']}
+            skeleton={nodes.index_fingers.skeleton}
+          />
+          <skinnedMesh
+            name="knees"
+            geometry={nodes.knees.geometry}
+            material={materials['Material.008']}
+            skeleton={nodes.knees.skeleton}
+          />
+          <skinnedMesh
+            name="lower_arms"
+            geometry={nodes.lower_arms.geometry}
+            material={materials['Material.009']}
+            skeleton={nodes.lower_arms.skeleton}
+          />
+          <skinnedMesh
+            name="middle_fingers"
+            geometry={nodes.middle_fingers.geometry}
+            material={materials['Material.008']}
+            skeleton={nodes.middle_fingers.skeleton}
+          />
+          <skinnedMesh
+            name="neck"
+            geometry={nodes.neck.geometry}
+            material={materials['Material.004']}
+            skeleton={nodes.neck.skeleton}
+          />
+          <skinnedMesh
+            name="pinkies"
+            geometry={nodes.pinkies.geometry}
+            material={materials['Material.008']}
+            skeleton={nodes.pinkies.skeleton}
+          />
+          <skinnedMesh
+            name="ring_fingers"
+            geometry={nodes.ring_fingers.geometry}
+            material={materials['Material.008']}
+            skeleton={nodes.ring_fingers.skeleton}
+          />
+          <skinnedMesh
+            name="shoulders"
+            geometry={nodes.shoulders.geometry}
+            material={materials['Material.008']}
+            skeleton={nodes.shoulders.skeleton}
+          />
+          <skinnedMesh
+            name="thighs_joint"
+            geometry={nodes.thighs_joint.geometry}
+            material={materials['Material.008']}
+            skeleton={nodes.thighs_joint.skeleton}
+          />
+          <skinnedMesh
+            name="thumbs"
+            geometry={nodes.thumbs.geometry}
+            material={materials['Material.008']}
+            skeleton={nodes.thumbs.skeleton}
+          />
+          <skinnedMesh
+            name="upper_arms"
+            geometry={nodes.upper_arms.geometry}
+            material={materials['Material.008']}
+            skeleton={nodes.upper_arms.skeleton}
+          />
+          <primitive object={nodes.spine} />
+        </group>
+      </group>
     </group>
   );
 }
 
-useGLTF.preload("/models/67c42818e8937271bd24ffcc.glb");
-useGLTF.preload("/models/animations.glb");
+useGLTF.preload("/models/talkywalky.glb");

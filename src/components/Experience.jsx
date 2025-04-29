@@ -7,7 +7,7 @@ import {
 } from "@react-three/drei";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useChat } from "../hooks/useChat";
-import { Avatar } from "./Avatar_neu";
+import { Avatar } from "./Avatar";
 
 import { PopUp } from "./PopupEffect";
 
@@ -53,11 +53,9 @@ export const Experience = () => {
     <>
       <CameraControls ref={cameraControls} />
 
-      <Avatar />
-
       <PopUp />
 
-      <Avatar  />
+      <Avatar />
 
       <Suspense>
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]}>
