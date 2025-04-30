@@ -92,7 +92,7 @@ const facialExpressions = {
   },
 };
 
-const corresponding = {
+const lipsyncDefinition = {
   A: "A",
   B: "B",
   C: "C",
@@ -112,19 +112,11 @@ export function Avatar(props) {
   const { nodes, materials, scene, animations } = useGLTF(
     "/models/talkywalky.glb"
   );
-
-  console.log("nodes", nodes);
-
   const { actions, mixer } = useAnimations(animations, group);
-
   const [animation, setAnimation] = useState(
     animations.find((a) => a.name === "idle") ? "idle" : animations[0].name // Check if Idle animation exists otherwise use first animation
   );
-
-  console.log(animations)
-
   const { message, onMessagePlayed, chat } = useChat();
-
   const [lipsync, setLipsync] = useState();
 
 
@@ -166,7 +158,7 @@ export function Avatar(props) {
     !setupMode &&
       Object.keys(nodes.left_eye.children[0].morphTargetDictionary).forEach((key) => {
         const mapping = facialExpressions[facialExpression];
-        if (key === "blink BA" || key === "eyeBlinkRight") {
+        if (key === "blink BA") {
           return; // eyes wink/blink are handled separately
         }
         if (mapping && mapping[key]) {
@@ -193,14 +185,14 @@ export function Avatar(props) {
 
     if (message && lipsync) {
       const currentAudioTime = audio.currentTime;
-      Object.values(corresponding).forEach((value) => {
+      Object.values(lipsyncDefinition).forEach((value) => {
         lerpMorphTarget(value, 0, 1, "head");
       });
 
       for (let i = 0; i < lipsync.mouthCues.length; i++) {
         const mouthCue = lipsync.mouthCues[i];
         if (currentAudioTime >= mouthCue.start && currentAudioTime <= mouthCue.end) {
-          lerpMorphTarget(corresponding[mouthCue.value], 1, 1, "head");
+          lerpMorphTarget(lipsyncDefinition[mouthCue.value], 1, 1, "head");
           break;
         }
       }
@@ -221,8 +213,6 @@ export function Avatar(props) {
     nextBlink();
     return () => clearTimeout(blinkTimeout);
   }, []);
-
-
 
 
   const lerpMorphTarget = (target, value, speed = 0.1, specificPart = null) => {
