@@ -5,7 +5,6 @@ Command: npx gltfjsx@6.2.3 public/models/64f1a714fe61576b46f27ca2.glb -o src/com
 
 import { useAnimations, useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { button, useControls } from "leva";
 import React, { useEffect, useRef, useState } from "react";
 
 
@@ -138,6 +137,7 @@ export function Avatar(props) {
     }
     setAnimation(message.animation);
     //setFacialExpression(message.facialExpression);
+    setFacialExpression("default");
 
     setLipsync(message.lipsync);
     const audio = new Audio("data:audio/mp3;base64," + message.audio);
@@ -156,170 +156,57 @@ export function Avatar(props) {
     return () => actions[animation].fadeOut(0.5);
   }, [animation]);
 
-
-  const lerpMorphTarget = (target, value, speed = 0.1) => {
-    scene.traverse((child) => {
-      if (child.isSkinnedMesh && child.morphTargetDictionary) {
-        const index = child.morphTargetDictionary[target];
-        if (
-          index === undefined ||
-          child.morphTargetInfluences[index] === undefined
-        ) {
-          return;
-        }
-        child.morphTargetInfluences[index] = THREE.MathUtils.lerp(
-          child.morphTargetInfluences[index],
-          value,
-          speed
-        );
-
-        if (!setupMode) {
-          try {
-            set({
-              [target]: value,
-            });
-          } catch (e) { }
-        }
-      }
-    });
-  };
-
   const [blink, setBlink] = useState(false);
-  const [winkLeft, setWinkLeft] = useState(false);
-  const [winkRight, setWinkRight] = useState(false);
   const [facialExpression, setFacialExpression] = useState("");
   const [audio, setAudio] = useState();
 
 
   useFrame(() => {
-    /*
 
     !setupMode &&
-      Object.keys(nodes.left_eye.morphTargetDictionary).forEach((key) => {
+      Object.keys(nodes.left_eye.children[0].morphTargetDictionary).forEach((key) => {
         const mapping = facialExpressions[facialExpression];
-        if (key === "eyeBlinkLeft" || key === "eyeBlinkRight") {
+        if (key === "blink BA" || key === "eyeBlinkRight") {
           return; // eyes wink/blink are handled separately
         }
         if (mapping && mapping[key]) {
-          lerpMorphTarget(key, mapping[key], 0.1);
+          if (key.startsWith("eye")) {
+            lerpMorphTarget(key, mapping[key], 0.1, "eyes");
+          }
+          else if (key.startsWith("mouth")) {
+            lerpMorphTarget(key, mapping[key], 0.1, "head");
+          }
+          else {
+            lerpMorphTarget(key, mapping[key], 0.1);
+          }
         } else {
           lerpMorphTarget(key, 0, 0.1);
         }
       });
 
-    */
-
-    lerpMorphTarget("eyeBlinkLeft", blink || winkLeft ? 1 : 0, 0.5);
-    lerpMorphTarget("eyeBlinkRight", blink || winkRight ? 1 : 0, 0.5);
-
-
-
-    nodes.left_eye.children[0].morphTargetInfluences[nodes.left_eye.children[0].morphTargetDictionary["smile"]] = 0;
-    nodes.left_eye.children[0].morphTargetInfluences[nodes.left_eye.children[0].morphTargetDictionary["happy"]] = 0;
-    nodes.left_eye.children[0].morphTargetInfluences[nodes.left_eye.children[0].morphTargetDictionary["heart"]] = 0;
-    nodes.left_eye.children[0].morphTargetInfluences[nodes.left_eye.children[0].morphTargetDictionary["sad"]] = 0;
-    nodes.left_eye.children[0].morphTargetInfluences[nodes.left_eye.children[0].morphTargetDictionary["star"]] = 0;
+    lerpMorphTarget("blink BA", blink ? 1 : 0, 0.5, "eyes");
 
     // LIPSYNC
     if (setupMode) {
       return;
     }
 
-
     if (message && lipsync) {
       const currentAudioTime = audio.currentTime;
-
-
       Object.values(corresponding).forEach((value) => {
-
-        nodes.head.children[0].morphTargetInfluences[nodes.head.children[0].morphTargetDictionary[value]] = 0;
-        nodes.head.children[1].morphTargetInfluences[nodes.head.children[1].morphTargetDictionary[value]] = 0;
-        nodes.head.children[2].morphTargetInfluences[nodes.head.children[2].morphTargetDictionary[value]] = 0;
-
+        lerpMorphTarget(value, 0, 1, "head");
       });
 
       for (let i = 0; i < lipsync.mouthCues.length; i++) {
         const mouthCue = lipsync.mouthCues[i];
         if (currentAudioTime >= mouthCue.start && currentAudioTime <= mouthCue.end) {
-          nodes.head.children[0].morphTargetInfluences[nodes.head.children[0].morphTargetDictionary[corresponding[mouthCue.value]]] = 1;
-          nodes.head.children[1].morphTargetInfluences[nodes.head.children[1].morphTargetDictionary[corresponding[mouthCue.value]]] = 1;
-          nodes.head.children[2].morphTargetInfluences[nodes.head.children[2].morphTargetDictionary[corresponding[mouthCue.value]]] = 1;
+          lerpMorphTarget(corresponding[mouthCue.value], 1, 1, "head");
           break;
         }
       }
     }
   });
 
-
-  /*
-  
-  useControls("FacialExpressions", {
-    chat: button(() => chat()),
-    winkLeft: button(() => {
-      setWinkLeft(true);
-      setTimeout(() => setWinkLeft(false), 300);
-    }),
-    winkRight: button(() => {
-      setWinkRight(true);
-      setTimeout(() => setWinkRight(false), 300);
-    }),
-    animation: {
-      value: animation,
-      options: animations.map((a) => a.name),
-      onChange: (value) => setAnimation(value),
-    },
-    facialExpression: {
-      options: Object.keys(facialExpressions),
-      onChange: (value) => setFacialExpression(value),
-    },
-    enableSetupMode: button(() => {
-      setupMode = true;
-    }),
-    disableSetupMode: button(() => {
-      setupMode = false;
-    }),
-    logMorphTargetValues: button(() => {
-      const emotionValues = {};
-      Object.keys(nodes.EyeLeft.morphTargetDictionary).forEach((key) => {
-        if (key === "eyeBlinkLeft" || key === "eyeBlinkRight") {
-          return; // eyes wink/blink are handled separately
-        }
-        const value =
-          nodes.EyeLeft.morphTargetInfluences[
-          nodes.EyeLeft.morphTargetDictionary[key]
-          ];
-        if (value > 0.01) {
-          emotionValues[key] = value;
-        }
-      });
-      console.log(JSON.stringify(emotionValues, null, 2));
-    }),
-  });
-  
-  const [, set] = useControls("MorphTarget", () =>
-    Object.assign(
-      {},
-      ...Object.keys(nodes.EyeLeft.morphTargetDictionary).map((key) => {
-        return {
-          [key]: {
-            label: key,
-            value: 0,
-            min: nodes.EyeLeft.morphTargetInfluences[
-              nodes.EyeLeft.morphTargetDictionary[key]
-            ],
-            max: 1,
-            onChange: (val) => {
-              if (setupMode) {
-                lerpMorphTarget(key, val, 1);
-              }
-            },
-          },
-        };
-      })
-    )
-  );
-  
-  
   useEffect(() => {
     let blinkTimeout;
     const nextBlink = () => {
@@ -334,8 +221,133 @@ export function Avatar(props) {
     nextBlink();
     return () => clearTimeout(blinkTimeout);
   }, []);
-  
-  */
+
+
+
+
+  const lerpMorphTarget = (target, value, speed = 0.1, specificPart = null) => {
+    // Funktion für spezifische Teile des Modells, wenn bekannt
+    const applyToSpecificPart = (node, childIndices) => {
+      if (!node) return;
+
+      // Für jedes angegebene Child-Element
+      childIndices.forEach(childIndex => {
+        if (node.children && node.children[childIndex]) {
+          const child = node.children[childIndex];
+
+          // Prüfe, ob das Child das Morph-Target enthält
+          if (child.morphTargetDictionary && child.morphTargetInfluences) {
+            const index = child.morphTargetDictionary[target];
+            if (index !== undefined && child.morphTargetInfluences[index] !== undefined) {
+              child.morphTargetInfluences[index] = THREE.MathUtils.lerp(
+                child.morphTargetInfluences[index],
+                value,
+                speed
+              );
+            }
+          }
+        }
+      });
+    };
+
+    if (specificPart === 'left_eye') {
+      applyToSpecificPart(nodes.left_eye, [0, 1, 2]);
+      return;
+    } else if (specificPart === 'right_eye') {
+      applyToSpecificPart(nodes.right_eye, [0, 1, 2]);
+      return;
+    } else if (specificPart === 'head') {
+      applyToSpecificPart(nodes.head, [0, 1, 2]);
+      return;
+    } else if (specificPart === 'eyes') {
+      applyToSpecificPart(nodes.left_eye, [0, 1, 2]);
+      applyToSpecificPart(nodes.right_eye, [0, 1, 2]);
+      return;
+    }
+
+    scene.traverse((child) => {
+      if (child.isSkinnedMesh && child.morphTargetDictionary) {
+        const index = child.morphTargetDictionary[target];
+        if (
+          index === undefined ||
+          child.morphTargetInfluences[index] === undefined
+        ) {
+          return;
+        }
+        child.morphTargetInfluences[index] = THREE.MathUtils.lerp(
+          child.morphTargetInfluences[index],
+          value,
+          speed
+        );
+      }
+    });
+
+    // Children von bekannten Knoten direkt behandeln
+    if (nodes.left_eye) {
+      [0, 1, 2].forEach(i => {
+        if (nodes.left_eye.children && nodes.left_eye.children[i]) {
+          const child = nodes.left_eye.children[i];
+          if (child.morphTargetDictionary && child.morphTargetInfluences) {
+            const index = child.morphTargetDictionary[target];
+            if (index !== undefined && child.morphTargetInfluences[index] !== undefined) {
+              child.morphTargetInfluences[index] = THREE.MathUtils.lerp(
+                child.morphTargetInfluences[index],
+                value,
+                speed
+              );
+            }
+          }
+        }
+      });
+    }
+
+    if (nodes.right_eye) {
+      [0, 1, 2].forEach(i => {
+        if (nodes.right_eye.children && nodes.right_eye.children[i]) {
+          const child = nodes.right_eye.children[i];
+          if (child.morphTargetDictionary && child.morphTargetInfluences) {
+            const index = child.morphTargetDictionary[target];
+            if (index !== undefined && child.morphTargetInfluences[index] !== undefined) {
+              child.morphTargetInfluences[index] = THREE.MathUtils.lerp(
+                child.morphTargetInfluences[index],
+                value,
+                speed
+              );
+            }
+          }
+        }
+      });
+    }
+
+    if (nodes.head) {
+      [0, 1, 2].forEach(i => {
+        if (nodes.head.children && nodes.head.children[i]) {
+          const child = nodes.head.children[i];
+          if (child.morphTargetDictionary && child.morphTargetInfluences) {
+            const index = child.morphTargetDictionary[target];
+            if (index !== undefined && child.morphTargetInfluences[index] !== undefined) {
+              child.morphTargetInfluences[index] = THREE.MathUtils.lerp(
+                child.morphTargetInfluences[index],
+                value,
+                speed
+              );
+            }
+          }
+        }
+      });
+    }
+
+    // GUI-Update, wenn im Setup-Modus
+    if (!setupMode) {
+      try {
+        set({
+          [target]: value,
+        });
+      } catch (e) { }
+    }
+  };
+
+
 
   return (
     <group ref={group} {...props} dispose={null}>
