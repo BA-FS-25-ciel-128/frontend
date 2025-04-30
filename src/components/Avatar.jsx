@@ -104,8 +104,6 @@ const lipsyncDefinition = {
   X: "X"
 };
 
-let setupMode = false;
-
 export function Avatar(props) {
   const group = useRef();
 
@@ -118,6 +116,9 @@ export function Avatar(props) {
   );
   const { message, onMessagePlayed, chat } = useChat();
   const [lipsync, setLipsync] = useState();
+  const [blink, setBlink] = useState(false);
+  const [facialExpression, setFacialExpression] = useState("");
+  const [audio, setAudio] = useState();
 
 
   useEffect(() => {
@@ -148,41 +149,32 @@ export function Avatar(props) {
     return () => actions[animation].fadeOut(0.5);
   }, [animation]);
 
-  const [blink, setBlink] = useState(false);
-  const [facialExpression, setFacialExpression] = useState("");
-  const [audio, setAudio] = useState();
-
 
   useFrame(() => {
 
-    !setupMode &&
-      Object.keys(nodes.left_eye.children[0].morphTargetDictionary).forEach((key) => {
-        const mapping = facialExpressions[facialExpression];
-        if (key === "blink BA") {
-          return; // eyes wink/blink are handled separately
+    Object.keys(nodes.left_eye.children[0].morphTargetDictionary).forEach((key) => {
+      const mapping = facialExpressions[facialExpression];
+      if (key === "blink BA") {
+        return; // eyes wink/blink are handled separately
+      }
+      if (mapping && mapping[key]) {
+        if (key.startsWith("eye")) {
+          lerpMorphTarget(key, mapping[key], 0.1, "eyes");
         }
-        if (mapping && mapping[key]) {
-          if (key.startsWith("eye")) {
-            lerpMorphTarget(key, mapping[key], 0.1, "eyes");
-          }
-          else if (key.startsWith("mouth")) {
-            lerpMorphTarget(key, mapping[key], 0.1, "head");
-          }
-          else {
-            lerpMorphTarget(key, mapping[key], 0.1);
-          }
-        } else {
-          lerpMorphTarget(key, 0, 0.1);
+        else if (key.startsWith("mouth")) {
+          lerpMorphTarget(key, mapping[key], 0.1, "head");
         }
-      });
+        else {
+          lerpMorphTarget(key, mapping[key], 0.1);
+        }
+      } else {
+        lerpMorphTarget(key, 0, 0.1);
+      }
+    });
 
     lerpMorphTarget("blink BA", blink ? 1 : 0, 0.5, "eyes");
 
     // LIPSYNC
-    if (setupMode) {
-      return;
-    }
-
     if (message && lipsync) {
       const currentAudioTime = audio.currentTime;
       Object.values(lipsyncDefinition).forEach((value) => {
@@ -327,14 +319,11 @@ export function Avatar(props) {
       });
     }
 
-    // GUI-Update, wenn im Setup-Modus
-    if (!setupMode) {
-      try {
-        set({
-          [target]: value,
-        });
-      } catch (e) { }
-    }
+    try {
+      set({
+        [target]: value,
+      });
+    } catch (e) { }
   };
 
 
