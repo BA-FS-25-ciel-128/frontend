@@ -49,13 +49,12 @@ export function PopUp(props) {
             return;
         }
 
-        const object = message.object;
+        const object = message.symbol;
 
-        console.log("object", object);
         if (object === "heart") {
             triggerPopupEffect(SYMBOLS.HEART);
         }
-        else if (object === "star") {
+        else if (object === "stars") {
             triggerPopupEffect(SYMBOLS.STAR, undefined, Math.floor(Math.random() * (15 - 7 + 1)) + 7);
         }
         else if (object === "exclamation mark") {
