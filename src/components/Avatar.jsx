@@ -14,82 +14,49 @@ import { useChat } from "../hooks/useChat";
 const facialExpressions = {
   default: {},
   smile: {
-    browInnerUp: 0.17,
-    eyeSquintLeft: 0.4,
-    eyeSquintRight: 0.44,
-    noseSneerLeft: 0.1700000727403593,
-    noseSneerRight: 0.14000002836874015,
-    mouthPressLeft: 0.61,
-    mouthPressRight: 0.41000000000000003,
+    friendlyMouth: 1,
+    friendlyRightEye: 1,
+    friendlyLeftEye: 1,
+    friendlyRightEyebrow: 1,
+    friendlyLeftEyebrow: 1,
   },
-  funnyFace: {
-    jawLeft: 0.63,
-    mouthPucker: 0.53,
-    noseSneerLeft: 1,
-    noseSneerRight: 0.39,
-    mouthLeft: 1,
-    eyeLookUpLeft: 1,
-    eyeLookUpRight: 1,
-    cheekPuff: 0.9999924982764238,
-    mouthDimpleLeft: 0.414743888682652,
-    mouthRollLower: 0.32,
-    mouthSmileLeft: 0.35499733688813034,
-    mouthSmileRight: 0.35499733688813034,
+  confused:{
+    questionMouth: 1,
+    questionLeftEye: 1,
+    shockLeftEyebrow: 1,
+    loweredRightEye: 1,
+    loweredRightEyebrow: 1,
   },
-  sad: {
-    mouthFrownLeft: 1,
-    mouthFrownRight: 1,
-    mouthShrugLower: 0.78341,
-    browInnerUp: 0.452,
-    eyeSquintLeft: 0.72,
-    eyeSquintRight: 0.75,
-    eyeLookDownLeft: 0.5,
-    eyeLookDownRight: 0.5,
-    jawForward: 1,
+  shocked:{
+    shockLeftEyebrow: 1,
+    shockRightEyebrow: 1,
+    shockLeftEye: 1,
+    shockRightEye: 1,
+    shockMouth: 1,
   },
-  surprised: {
-    eyeWideLeft: 0.5,
-    eyeWideRight: 0.5,
-    jawOpen: 0.351,
-    mouthFunnel: 1,
-    browInnerUp: 1,
+  apologetic:{
+    apologeticMouth: 1,
+    questionLeftEye:1,
+    questionRightEye:1,
+    questionLeftEyebrow: 1,
+    questionRightEyebrow: 1,
   },
-  angry: {
-    browDownLeft: 1,
-    browDownRight: 1,
-    eyeSquintLeft: 1,
-    eyeSquintRight: 1,
-    jawForward: 1,
-    jawLeft: 1,
-    mouthShrugLower: 1,
-    noseSneerLeft: 1,
-    noseSneerRight: 0.42,
-    eyeLookDownLeft: 0.16,
-    eyeLookDownRight: 0.16,
-    cheekSquintLeft: 1,
-    cheekSquintRight: 1,
-    mouthClose: 0.23,
-    mouthFunnel: 0.63,
-    mouthDimpleRight: 1,
+  sad:{
+    sadMouth: 1,
+    sadRightEye: 1,
+    sadLeftEye: 1,
+    sadLeftEyebrow: 1,
+    sadRightEyebrow: 1,
   },
-  crazy: {
-    browInnerUp: 0.9,
-    jawForward: 1,
-    noseSneerLeft: 0.5700000000000001,
-    noseSneerRight: 0.51,
-    eyeLookDownLeft: 0.39435766259644545,
-    eyeLookUpRight: 0.4039761421719682,
-    eyeLookInLeft: 0.9618479575523053,
-    eyeLookInRight: 0.9618479575523053,
-    jawOpen: 0.9618479575523053,
-    mouthDimpleLeft: 0.9618479575523053,
-    mouthDimpleRight: 0.9618479575523053,
-    mouthStretchLeft: 0.27893590769016857,
-    mouthStretchRight: 0.2885543872656917,
-    mouthSmileLeft: 0.5578718153803371,
-    mouthSmileRight: 0.38473918302092225,
-    tongueOut: 0.9618479575523053,
+
+  baffled:{
+    apologeticMouth: 1,
+    confusedLeftEye: 1,
+    confusedRightEye: 1,
+    raisedLeftEyebrow: 1,
+    loweredRightEyebrow: 1,
   },
+
 };
 
 const lipsyncDefinition = {
@@ -103,6 +70,38 @@ const lipsyncDefinition = {
   H: "A",
   X: "X"
 };
+
+const morphTargetToPart = {
+  friendlyMouth: "head",
+  questionMouth: "head",
+  shockMouth: "head",
+  apologeticMouth: "head",
+  sadMouth: "head",
+
+  friendlyLeftEye: "left_eye",
+  friendlyRightEye: "right_eye",
+  questionLeftEye: "left_eye",
+  questionRightEye: "right_eye",
+  shockLeftEye: "left_eye",
+  shockRightEye: "right_eye",
+  loweredRightEye: "right_eye",
+  sadRightEye: "right_eye",
+  sadLeftEye: "left_eye",
+  confusedLeftEye: "left_eye",
+  confusedRightEye: "right_eye",
+
+  friendlyLeftEyebrow: "left_eyebrow",
+  friendlyRightEyebrow: "right_eyebrow",
+  loweredRightEyebrow: "right_eyebrow",
+  shockLeftEyebrow: "left_eyebrow",
+  shockRightEyebrow: "right_eyebrow",
+  questionLeftEyebrow: "left_eyebrow",
+  questionRightEyebrow: "right_eyebrow",
+  sadRightEyebrow: "right_eyebrow",
+  sadLeftEyebrow: "left_eyebrow",
+};
+
+
 
 export function Avatar(props) {
   const group = useRef();
@@ -128,51 +127,53 @@ export function Avatar(props) {
       setAnimation("idle");
       return;
     }
-    setAnimation(message.animation);
-    //setFacialExpression(message.facialExpression);
-    setFacialExpression("default");
+
+    const animExists = animations.find((a) => a.name === message.animation);
+    setAnimation(animExists ? message.animation : "idle");
+
+    setFacialExpression(message.facialExpression);
 
     setLipsync(message.lipsync);
     const audio = new Audio("data:audio/mp3;base64," + message.audio);
     console.log("audio:" + audio);
     audio.play();
     setAudio(audio);
-    audio.onended = onMessagePlayed;
+    audio.onended = () => {
+      setFacialExpression("");  // Reset facial expression to neutral/default
+      setAnimation("idle");     // Optionally go back to idle animation
+      onMessagePlayed();        // Let the chat system know we're done
+    };
   }, [message]);
 
 
   useEffect(() => {
     actions[animation]
-      .reset()
+      ?.reset()
       .fadeIn(mixer.stats.actions.inUse === 0 ? 0 : 0.5)
       .play();
-    return () => actions[animation].fadeOut(0.5);
+    return () => actions[animation]?.fadeOut(0.5);
   }, [animation]);
 
 
   useFrame(() => {
 
-    Object.keys(nodes.left_eye.children[0].morphTargetDictionary).forEach((key) => {
-      const mapping = facialExpressions[facialExpression];
-      if (key === "blink BA") {
-        return; // eyes wink/blink are handled separately
-      }
-      if (mapping && mapping[key]) {
-        if (key.startsWith("eye")) {
-          lerpMorphTarget(key, mapping[key], 0.1, "eyes");
-        }
-        else if (key.startsWith("mouth")) {
-          lerpMorphTarget(key, mapping[key], 0.1, "head");
-        }
-        else {
-          lerpMorphTarget(key, mapping[key], 0.1);
-        }
-      } else {
-        lerpMorphTarget(key, 0, 0.1);
+
+    Object.entries(facialExpressions[facialExpression] || {}).forEach(([key, value]) => {
+      const part = morphTargetToPart[key];
+      //console.log("Key:", key, "→ Part:", part);
+
+      lerpMorphTarget(key, value, 0.1, part);
+    });
+
+
+    Object.keys(morphTargetToPart).forEach((key) => {
+      if (!(facialExpressions[facialExpression] || {})[key]) {
+        const part = morphTargetToPart[key];
+        lerpMorphTarget(key, 0, 0.1, part);
       }
     });
 
-    lerpMorphTarget("blink BA", blink ? 1 : 0, 0.5, "eyes");
+    lerpMorphTarget("blink", blink ? 1 : 0, 0.5, "eyes");
 
     // LIPSYNC
     if (message && lipsync) {
@@ -232,6 +233,20 @@ export function Avatar(props) {
       });
     };
 
+    const applyToMeshDirectly = (mesh, target, value, speed) => {
+      if (!mesh) return;
+      const index = mesh.morphTargetDictionary?.[target];
+      if (index !== undefined && mesh.morphTargetInfluences?.[index] !== undefined) {
+        mesh.morphTargetInfluences[index] = THREE.MathUtils.lerp(
+            mesh.morphTargetInfluences[index],
+            value,
+            speed
+        );
+      }
+    };
+
+
+
     if (specificPart === 'left_eye') {
       applyToSpecificPart(nodes.left_eye, [0, 1, 2]);
       return;
@@ -241,7 +256,16 @@ export function Avatar(props) {
     } else if (specificPart === 'head') {
       applyToSpecificPart(nodes.head, [0, 1, 2]);
       return;
-    } else if (specificPart === 'eyes') {
+    }
+    if (specificPart === 'left_eyebrow') {
+      applyToMeshDirectly(nodes.left_eyebrow, target, value, speed);
+      return;
+    } else if (specificPart === 'right_eyebrow') {
+      applyToMeshDirectly(nodes.right_eyebrow, target, value, speed);
+      return;
+    }
+
+    else if (specificPart === 'eyes') {
       applyToSpecificPart(nodes.left_eye, [0, 1, 2]);
       applyToSpecificPart(nodes.right_eye, [0, 1, 2]);
       return;
@@ -284,6 +308,7 @@ export function Avatar(props) {
     }
 
     if (nodes.right_eye) {
+      console.log("IN RIGHT EYE")
       [0, 1, 2].forEach(i => {
         if (nodes.right_eye.children && nodes.right_eye.children[i]) {
           const child = nodes.right_eye.children[i];
@@ -299,6 +324,31 @@ export function Avatar(props) {
           }
         }
       });
+    }
+
+    console.log("nodes.right_eyebrow:", nodes.right_eyebrow);
+
+    if (nodes.right_eyebrow) {
+      console.log("IN RIGHT EYEBROW")
+      const index = nodes.right_eyebrow.morphTargetDictionary[target];
+      if (index !== undefined && nodes.right_eyebrow.morphTargetInfluences[index] !== undefined) {
+        nodes.right_eyebrow.morphTargetInfluences[index] = THREE.MathUtils.lerp(
+            nodes.right_eyebrow.morphTargetInfluences[index],
+            value,
+            speed
+        );
+      }
+    }
+
+    if (nodes.left_eyebrow) {
+      const index = nodes.left_eyebrow.morphTargetDictionary[target];
+      if (index !== undefined && nodes.left_eyebrow.morphTargetInfluences[index] !== undefined) {
+        nodes.left_eyebrow.morphTargetInfluences[index] = THREE.MathUtils.lerp(
+            nodes.left_eyebrow.morphTargetInfluences[index],
+            value,
+            speed
+        );
+      }
     }
 
     if (nodes.head) {
@@ -338,7 +388,7 @@ export function Avatar(props) {
             material={materials['Material.009']}
             skeleton={nodes.body.skeleton}
             morphTargetDictionary={[nodes.head.children[0].morphTargetDictionary, nodes.left_eye.children[0].morphTargetDictionary, nodes.right_eye.morphTargetDictionary, nodes.left_eyebrow.morphTargetDictionary, nodes.right_eyebrow.morphTargetDictionary]}
-            morphTargetInfluences={[nodes.head.children[0].morphInfluences, nodes.left_eye.children[0].morphInfluences, nodes.right_eye.morphInfluences, nodes.left_eye.morphInfluences, nodes.right_eyebrow.morphInfluences]}
+            morphTargetInfluences={[nodes.head.children[0].morphInfluences, nodes.left_eye.children[0].morphInfluences, nodes.right_eye.morphInfluences, nodes.left_eyebrow.morphInfluences, nodes.right_eyebrow.morphInfluences]}
           />
           <group name="feet">
             <skinnedMesh

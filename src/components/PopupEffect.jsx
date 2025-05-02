@@ -1,7 +1,7 @@
 
 import { useFrame } from "@react-three/fiber";
 
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 
 import * as THREE from "three";
@@ -10,16 +10,16 @@ import { useChat } from "../hooks/useChat";
 
 const SYMBOLS = {
     HEART: "heart",
-    STAR: "star",
-    EXCLAMATION: "exclamation",
-    LIGHT_BULB: "lightBulb",
+    STAR: "stars",
+    EXCLAMATION: "exclamation mark",
+    LIGHT_BULB: "lightbulb",
     SMILE: "smile"
 };
 
 export function PopUp(props) {
     const group = useRef();
 
-    const { message, onMessagePlayed, chat } = useChat();
+    const { message} = useChat();
 
     // Generische State für Popup-Effekte
     const [popupEffect, setPopupEffect] = useState({
@@ -48,22 +48,22 @@ export function PopUp(props) {
         if (!message) {
             return;
         }
-        const text = message.text.toLowerCase();
 
-        console.log(text);
-        if (text.includes("danke") || text.includes("liebe")) {
+        const object = message.symbol;
+
+        if (object === SYMBOLS.HEART) {
             triggerPopupEffect(SYMBOLS.HEART);
         }
-        else if (text.includes("toll")) {
+        else if (object === SYMBOLS.STAR) {
             triggerPopupEffect(SYMBOLS.STAR, undefined, Math.floor(Math.random() * (15 - 7 + 1)) + 7);
         }
-        else if (text.includes("important") || text.includes("achtung")) {
+        else if (object === SYMBOLS.EXCLAMATION) {
             triggerPopupEffect(SYMBOLS.EXCLAMATION);
         }
-        else if (text.includes("idea") || text.includes("verstehe")) {
+        else if (object === SYMBOLS.LIGHT_BULB) {
             triggerPopupEffect(SYMBOLS.LIGHT_BULB);
         }
-        else if (text.includes("funny")) {
+        else if (object === SYMBOLS.SMILE) {
             triggerPopupEffect(SYMBOLS.SMILE);
         }
     }, [message]);
@@ -231,7 +231,6 @@ function PopupEffect({ symbolType, trigger, position, count = 5 }) {
     // Beim Auslösen eines Triggers neue Effekte hinzufügen
     useEffect(() => {
         if (trigger) {
-            const newEffects = [];
             const effectCount = count || Math.floor(Math.random() * 3) + 3; // 3 bis 5 Symbole
 
             for (let i = 0; i < effectCount; i++) {
