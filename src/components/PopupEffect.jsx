@@ -48,22 +48,23 @@ export function PopUp(props) {
         if (!message) {
             return;
         }
-        const text = message.text.toLowerCase();
 
-        console.log(text);
-        if (text.includes("danke") || text.includes("liebe")) {
+        const object = message.object;
+
+        console.log("object", object);
+        if (object === "heart") {
             triggerPopupEffect(SYMBOLS.HEART);
         }
-        else if (text.includes("toll")) {
+        else if (object === "star") {
             triggerPopupEffect(SYMBOLS.STAR, undefined, Math.floor(Math.random() * (15 - 7 + 1)) + 7);
         }
-        else if (text.includes("important") || text.includes("achtung")) {
+        else if (object === "exclamation mark") {
             triggerPopupEffect(SYMBOLS.EXCLAMATION);
         }
-        else if (text.includes("idea") || text.includes("verstehe")) {
+        else if (object === "lightbulb") {
             triggerPopupEffect(SYMBOLS.LIGHT_BULB);
         }
-        else if (text.includes("funny")) {
+        else if (object === "smile") {
             triggerPopupEffect(SYMBOLS.SMILE);
         }
     }, [message]);
