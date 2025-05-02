@@ -1,7 +1,7 @@
 
 import { useFrame } from "@react-three/fiber";
 
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 
 import * as THREE from "three";
@@ -19,7 +19,7 @@ const SYMBOLS = {
 export function PopUp(props) {
     const group = useRef();
 
-    const { message, onMessagePlayed, chat } = useChat();
+    const { message} = useChat();
 
     // Generische State für Popup-Effekte
     const [popupEffect, setPopupEffect] = useState({
@@ -231,7 +231,6 @@ function PopupEffect({ symbolType, trigger, position, count = 5 }) {
     // Beim Auslösen eines Triggers neue Effekte hinzufügen
     useEffect(() => {
         if (trigger) {
-            const newEffects = [];
             const effectCount = count || Math.floor(Math.random() * 3) + 3; // 3 bis 5 Symbole
 
             for (let i = 0; i < effectCount; i++) {
