@@ -10,9 +10,9 @@ import { useChat } from "../hooks/useChat";
 
 const SYMBOLS = {
     HEART: "heart",
-    STAR: "star",
-    EXCLAMATION: "exclamation",
-    LIGHT_BULB: "lightBulb",
+    STAR: "stars",
+    EXCLAMATION: "exclamation mark",
+    LIGHT_BULB: "lightbulb",
     SMILE: "smile"
 };
 
@@ -51,19 +51,19 @@ export function PopUp(props) {
 
         const object = message.symbol;
 
-        if (object === "heart") {
+        if (object === SYMBOLS.HEART) {
             triggerPopupEffect(SYMBOLS.HEART);
         }
-        else if (object === "stars") {
+        else if (object === SYMBOLS.STAR) {
             triggerPopupEffect(SYMBOLS.STAR, undefined, Math.floor(Math.random() * (15 - 7 + 1)) + 7);
         }
-        else if (object === "exclamation mark") {
+        else if (object === SYMBOLS.EXCLAMATION) {
             triggerPopupEffect(SYMBOLS.EXCLAMATION);
         }
-        else if (object === "lightbulb") {
+        else if (object === SYMBOLS.LIGHT_BULB) {
             triggerPopupEffect(SYMBOLS.LIGHT_BULB);
         }
-        else if (object === "smile") {
+        else if (object === SYMBOLS.SMILE) {
             triggerPopupEffect(SYMBOLS.SMILE);
         }
     }, [message]);
