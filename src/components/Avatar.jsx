@@ -308,7 +308,6 @@ export function Avatar(props) {
     }
 
     if (nodes.right_eye) {
-      console.log("IN RIGHT EYE")
       [0, 1, 2].forEach(i => {
         if (nodes.right_eye.children && nodes.right_eye.children[i]) {
           const child = nodes.right_eye.children[i];
@@ -325,8 +324,6 @@ export function Avatar(props) {
         }
       });
     }
-
-    console.log("nodes.right_eyebrow:", nodes.right_eyebrow);
 
     if (nodes.right_eyebrow) {
       console.log("IN RIGHT EYEBROW")
@@ -375,7 +372,6 @@ export function Avatar(props) {
       });
     } catch (e) { }
   };
-
 
 
   return (
