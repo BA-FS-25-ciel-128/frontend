@@ -34,7 +34,7 @@ const facialExpressions = {
     shockRightEye: 1,
     shockMouth: 1,
   },
-  apologetic:{
+  concerned:{
     apologeticMouth: 1,
     questionLeftEye:1,
     questionRightEye:1,
@@ -53,7 +53,7 @@ const facialExpressions = {
     apologeticMouth: 1,
     confusedLeftEye: 1,
     confusedRightEye: 1,
-    raisedLeftEyebrow: 1,
+    questionLeftEyebrow: 1,
     loweredRightEyebrow: 1,
   },
 
