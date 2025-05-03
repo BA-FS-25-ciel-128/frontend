@@ -49,7 +49,7 @@ const facialExpressions = {
     sadRightEyebrow: 1,
   },
 
-  baffled:{
+  offended:{
     apologeticMouth: 1,
     confusedLeftEye: 1,
     confusedRightEye: 1,
