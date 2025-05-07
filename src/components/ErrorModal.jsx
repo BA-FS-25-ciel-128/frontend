@@ -12,7 +12,7 @@ export const ErrorModal = () => {
             <div className="error-modal">
                 <h3>Fehler im Backend</h3>
                 <p>Es wurde eine unzulässige Nachricht gesendet, bitte versuche es erneut!</p>
-                <button onClick={clearError}>Schließen</button>
+                <button onClick={clearError}>Schliessen</button>
             </div>
         </div>
     );
