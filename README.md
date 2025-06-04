@@ -13,7 +13,8 @@ Additionally, the blend file of the avatar TalkyWalky can be found [here](https:
 
 ## Functionality
 
-TODO here: add picture
+![Frontend](./public/images/frontend.png)
+
 
 Simply write a short message in the input box to start chatting with TalkyWalky. The message is sent to the backend for processing. Once a response is received, the frontend animates the avatar accordingly, including lip sync, facial expressions and matching body movements.
 
